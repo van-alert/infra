@@ -1,0 +1,192 @@
+openapi: "3.0"
+info:
+  description: "Get a timely alert for your desired Van relocations. This website uses ntfy.sh. Chuck me a Coffee if you want to support me and the server costs at https://buymeacoffee.com/dder"
+  version: "1.0.0"
+  title: "Van Alert"
+  termsOfService: "https://van-alert.com/terms/"
+  contact:
+    email: "rootjdev@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "van-alert.com"
+basePath: "/v1"
+tags:
+  - name: "alert"
+    description: "Everything about your Alerts"
+    externalDocs:
+      description: "Find out more"
+      url: "http://swagger.io"
+  - name: "destination"
+    description: "Operations for one particular destination"
+    externalDocs:
+      description: "Find out more about the notification system at ntfy.sh"
+      url: "https://ntfy.sh"
+schemes:
+  - "https"
+paths:
+  /dest:
+    post:
+      tags:
+        - "destination"
+      summary: "Creates a new ntfy.sh destination"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Destination object that needs to be added notifier"
+          required: true
+          schema:
+            type: object
+            properties:
+              id:
+                $ref: "#/parameters/destId"
+      responses:
+        "201":
+          description: "Successfully created destination"
+        "409":
+          description: "Destination already exists"
+  /dest/{destId}:
+    delete:
+      tags:
+        - "destination"
+      summary: "Deletes an existing new ntfy.sh destination"
+      parameters:
+        - $ref: "#/parameters/destId"
+      responses:
+        "204":
+          description: "Successfully deleted destination and all alerts under it"
+        "404":
+          description: "Destination not found"
+  /dest/{destId}/alerts:
+    get:
+      tags:
+        - "alert"
+        - "destination"
+      summary: "Find all alerts by destinationID"
+      description: "Returns all alerts that are saved for this particular destId"
+      operationId: "getAlertByDestId"
+      parameters:
+        - $ref: "#/parameters/destId"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Alert"
+        "400":
+          description: "Invalid destID supplied"
+        "404":
+          description: "Destination not found by destId"
+    post:
+      tags:
+        - "alert"
+        - "destination"
+      summary: "Add a new pet to the store"
+      description: ""
+      operationId: "addAlert"
+      parameters:
+        - $ref: "#/parameters/destId"
+        - in: "body"
+          name: "body"
+          description: "Alert object that needs to be added to the store"
+          required: true
+          schema:
+            $ref: "#/definitions/Alert"
+      responses:
+        "405":
+          description: "Invalid input"
+  /dest/{destId}/alerts/{alertId}:
+    put:
+      tags:
+        - "alert"
+        - "destination"
+      summary: "Update an existing alert"
+      description: ""
+      operationId: "updateAlert"
+      parameters:
+        - $ref: "#/parameters/destId"
+        - $ref: "#/parameters/alertId"
+        - in: "body"
+          name: "body"
+          description: "Alert object that needs to be updated"
+          required: true
+          schema:
+            $ref: "#/definitions/Alert"
+      responses:
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Alert not found"
+        "405":
+          description: "Validation exception"
+    delete:
+      tags:
+        - "alert"
+      summary: "Deletes an alert"
+      description: ""
+      operationId: "deleteAlert"
+      parameters:
+        - name: "destId"
+          in: "path"
+          description: "destinationId of the Alert to delete"
+          required: true
+          type: "string"
+        - name: "alertId"
+          in: "path"
+          description: "alertId of the Alert to delete"
+          required: true
+          type: "string"
+      responses:
+        "400":
+          description: "Invalid ID(s) supplied"
+        "404":
+          description: "Alert not found for given Destination"
+definitions:
+  Alert:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      from:
+        $ref: "#/components/schemas/City"
+      to:
+        $ref: "#/components/schemas/City"
+      expire:
+        type: "string"
+        format: "date-time"
+      activeClients:
+        type: "array"
+        items:
+          $ref: "#/components/schemas/Client"
+parameters:
+  destId:
+    name: "destId"
+    in: "path"
+    description: "Id of destination"
+    required: true
+    type: "string"
+  alertId:
+    in: "path"
+    name: "alertId"
+    description: "Id of the alert"
+    type: "string"
+    required: true
+
+components:
+  schemas:
+    City:
+      type: string
+      enum:
+        - SYD
+        - ADL
+        - MEL
+        - OOL
+        - PER
+        - AKL
+    Client:
+      type: string
+      enum:
+        - COS
+        - IMO
