@@ -1,4 +1,4 @@
-openapi: "3.0"
+swagger: "2.0"
 info:
   description: "Get a timely alert for your desired Van relocations. This website uses ntfy.sh. Chuck me a Coffee if you want to support me and the server costs at https://buymeacoffee.com/dder"
   version: "1.0.0"
@@ -30,6 +30,8 @@ paths:
       tags:
         - "destination"
       summary: "Creates a new ntfy.sh destination"
+      consumes:
+        - "application/json"
       parameters:
         - in: "body"
           name: "body"
@@ -38,13 +40,13 @@ paths:
           schema:
             type: object
             properties:
-              id:
-                $ref: "#/parameters/destId"
+              destId:
+                type: "string"
       responses:
         "201":
           description: "Successfully created destination"
         "409":
-          description: "Destination already exists"
+          description: "Destination already exists in db"
   /dest/{destId}:
     delete:
       tags:
@@ -65,6 +67,8 @@ paths:
       summary: "Find all alerts by destinationID"
       description: "Returns all alerts that are saved for this particular destId"
       operationId: "getAlertByDestId"
+      produces:
+        - "application/json"
       parameters:
         - $ref: "#/parameters/destId"
       responses:
@@ -82,9 +86,13 @@ paths:
       tags:
         - "alert"
         - "destination"
-      summary: "Add a new pet to the store"
+      summary: "Add a new alert to the db"
       description: ""
       operationId: "addAlert"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
       parameters:
         - $ref: "#/parameters/destId"
         - in: "body"
@@ -102,7 +110,10 @@ paths:
         - "alert"
         - "destination"
       summary: "Update an existing alert"
-      description: ""
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
       operationId: "updateAlert"
       parameters:
         - $ref: "#/parameters/destId"
@@ -150,16 +161,30 @@ definitions:
         type: "integer"
         format: "int64"
       from:
-        $ref: "#/components/schemas/City"
+        $ref: "#/definitions/City"
       to:
-        $ref: "#/components/schemas/City"
+        $ref: "#/definitions/City"
       expire:
         type: "string"
         format: "date-time"
       activeClients:
         type: "array"
         items:
-          $ref: "#/components/schemas/Client"
+          $ref: "#/definitions/City"
+  City:
+    type: string
+    enum:
+      - SYD
+      - ADL
+      - MEL
+      - OOL
+      - PER
+      - AKL
+  Client:
+    type: string
+    enum:
+      - COS
+      - IMO
 parameters:
   destId:
     name: "destId"
@@ -173,20 +198,3 @@ parameters:
     description: "Id of the alert"
     type: "string"
     required: true
-
-components:
-  schemas:
-    City:
-      type: string
-      enum:
-        - SYD
-        - ADL
-        - MEL
-        - OOL
-        - PER
-        - AKL
-    Client:
-      type: string
-      enum:
-        - COS
-        - IMO
