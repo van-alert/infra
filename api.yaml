@@ -1,200 +1,237 @@
-swagger: "2.0"
+openapi: 3.0.1
 info:
-  description: "Get a timely alert for your desired Van relocations. This website uses ntfy.sh. Chuck me a Coffee if you want to support me and the server costs at https://buymeacoffee.com/dder"
-  version: "1.0.0"
-  title: "Van Alert"
-  termsOfService: "https://van-alert.com/terms/"
+  title: Van Alert
+  description:
+    Get a timely alert for your desired Van relocations. This website uses
+    ntfy.sh. Chuck me a Coffee if you want to support me and the server costs at https://buymeacoffee.com/dder
+  termsOfService: https://van-alert.com/terms/
   contact:
-    email: "rootjdev@gmail.com"
+    email: rootjdev@gmail.com
   license:
-    name: "Apache 2.0"
-    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-host: "van-alert.com"
-basePath: "/v1"
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: /v1
+    description: Development
 tags:
-  - name: "alert"
-    description: "Everything about your Alerts"
+  - name: alert
+    description: Everything about your Alerts
     externalDocs:
-      description: "Find out more"
-      url: "http://swagger.io"
-  - name: "destination"
-    description: "Operations for one particular destination"
+      description: Find out more
+      url: http://swagger.io
+  - name: destination
+    description: Operations for one particular destination
     externalDocs:
-      description: "Find out more about the notification system at ntfy.sh"
-      url: "https://ntfy.sh"
-schemes:
-  - "https"
+      description: Find out more about the notification system at ntfy.sh
+      url: https://ntfy.sh
 paths:
   /dest:
     post:
       tags:
-        - "destination"
-      summary: "Creates a new ntfy.sh destination"
-      consumes:
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "Destination object that needs to be added notifier"
-          required: true
-          schema:
-            type: object
-            properties:
-              destId:
-                type: "string"
+        - destination
+      summary: Creates a new ntfy.sh destination
+      requestBody:
+        description: Destination object that needs to be added notifier
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                destId:
+                  type: string
+        required: true
       responses:
         "201":
-          description: "Successfully created destination"
+          description: Successfully created destination
+          content: {}
         "409":
-          description: "Destination already exists in db"
+          description: Destination already exists in db
+          content: {}
+      x-codegen-request-body-name: body
   /dest/{destId}:
     delete:
       tags:
-        - "destination"
-      summary: "Deletes an existing new ntfy.sh destination"
+        - destination
+      summary: Deletes an existing new ntfy.sh destination
       parameters:
-        - $ref: "#/parameters/destId"
+        - name: destId
+          in: path
+          description: Id of destination
+          required: true
+          schema:
+            type: string
       responses:
         "204":
-          description: "Successfully deleted destination and all alerts under it"
+          description: Successfully deleted destination and all alerts under it
+          content: {}
         "404":
-          description: "Destination not found"
+          description: Destination not found
+          content: {}
   /dest/{destId}/alerts:
     get:
       tags:
-        - "alert"
-        - "destination"
-      summary: "Find all alerts by destinationID"
-      description: "Returns all alerts that are saved for this particular destId"
-      operationId: "getAlertByDestId"
-      produces:
-        - "application/json"
+        - alert
+        - destination
+      summary: Find all alerts by destinationID
+      description: Returns all alerts that are saved for this particular destId
+      operationId: getAlertByDestId
       parameters:
-        - $ref: "#/parameters/destId"
-      responses:
-        "200":
-          description: "successful operation"
-          schema:
-            type: array
-            items:
-              $ref: "#/definitions/Alert"
-        "400":
-          description: "Invalid destID supplied"
-        "404":
-          description: "Destination not found by destId"
-    post:
-      tags:
-        - "alert"
-        - "destination"
-      summary: "Add a new alert to the db"
-      description: ""
-      operationId: "addAlert"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - $ref: "#/parameters/destId"
-        - in: "body"
-          name: "body"
-          description: "Alert object that needs to be added to the store"
+        - name: destId
+          in: path
+          description: Id of destination
           required: true
           schema:
-            $ref: "#/definitions/Alert"
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Alert"
+        "400":
+          description: Invalid destID supplied
+          content: {}
+        "404":
+          description: Destination not found by destId
+          content: {}
+    post:
+      tags:
+        - alert
+        - destination
+      summary: Add a new alert to the db
+      operationId: addAlert
+      parameters:
+        - name: destId
+          in: path
+          description: Id of destination
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Alert object that needs to be added to the store
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Alert"
+        required: true
       responses:
         "405":
-          description: "Invalid input"
+          description: Invalid input
+          content: {}
+      x-codegen-request-body-name: body
   /dest/{destId}/alerts/{alertId}:
     put:
       tags:
-        - "alert"
-        - "destination"
-      summary: "Update an existing alert"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      operationId: "updateAlert"
+        - alert
+        - destination
+      summary: Update an existing alert
+      operationId: updateAlert
       parameters:
-        - $ref: "#/parameters/destId"
-        - $ref: "#/parameters/alertId"
-        - in: "body"
-          name: "body"
-          description: "Alert object that needs to be updated"
+        - name: destId
+          in: path
+          description: Id of destination
           required: true
           schema:
-            $ref: "#/definitions/Alert"
+            type: string
+        - name: alertId
+          in: path
+          description: Id of the alert
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Alert object that needs to be updated
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Alert"
+        required: true
       responses:
         "400":
-          description: "Invalid ID supplied"
+          description: Invalid ID supplied
+          content: {}
         "404":
-          description: "Alert not found"
+          description: Alert not found
+          content: {}
         "405":
-          description: "Validation exception"
+          description: Validation exception
+          content: {}
+      x-codegen-request-body-name: body
     delete:
       tags:
-        - "alert"
-      summary: "Deletes an alert"
-      description: ""
-      operationId: "deleteAlert"
+        - alert
+      summary: Deletes an alert
+      operationId: deleteAlert
       parameters:
-        - name: "destId"
-          in: "path"
-          description: "destinationId of the Alert to delete"
+        - name: destId
+          in: path
+          description: destinationId of the Alert to delete
           required: true
-          type: "string"
-        - name: "alertId"
-          in: "path"
-          description: "alertId of the Alert to delete"
+          schema:
+            type: string
+        - name: alertId
+          in: path
+          description: alertId of the Alert to delete
           required: true
-          type: "string"
+          schema:
+            type: string
       responses:
         "400":
-          description: "Invalid ID(s) supplied"
+          description: Invalid ID(s) supplied
+          content: {}
         "404":
-          description: "Alert not found for given Destination"
-definitions:
-  Alert:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      from:
-        $ref: "#/definitions/City"
-      to:
-        $ref: "#/definitions/City"
-      expire:
-        type: "string"
-        format: "date-time"
-      activeClients:
-        type: "array"
-        items:
-          $ref: "#/definitions/City"
-  City:
-    type: string
-    enum:
-      - SYD
-      - ADL
-      - MEL
-      - OOL
-      - PER
-      - AKL
-  Client:
-    type: string
-    enum:
-      - COS
-      - IMO
-parameters:
-  destId:
-    name: "destId"
-    in: "path"
-    description: "Id of destination"
-    required: true
-    type: "string"
-  alertId:
-    in: "path"
-    name: "alertId"
-    description: "Id of the alert"
-    type: "string"
-    required: true
+          description: Alert not found for given Destination
+          content: {}
+components:
+  schemas:
+    Alert:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        from:
+          $ref: "#/components/schemas/City"
+        to:
+          $ref: "#/components/schemas/City"
+        expire:
+          type: string
+          format: date-time
+        activeClients:
+          type: array
+          items:
+            $ref: "#/components/schemas/City"
+    City:
+      type: string
+      enum:
+        - SYD
+        - ADL
+        - MEL
+        - OOL
+        - PER
+        - AKL
+    Client:
+      type: string
+      enum:
+        - COS
+        - IMO
+  parameters:
+    destId:
+      name: destId
+      in: path
+      description: Id of destination
+      required: true
+      schema:
+        type: string
+    alertId:
+      name: alertId
+      in: path
+      description: Id of the alert
+      required: true
+      schema:
+        type: string
+x-original-swagger-version: "2.0"
