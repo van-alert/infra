@@ -31,33 +31,32 @@ paths:
       tags:
         - destination
       summary: Creates a new ntfy.sh destination
+      operationId: CreateDest
       requestBody:
         description: Destination object that needs to be added notifier
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                destId:
-                  type: string
+              $ref: "#/components/schemas/Destination"
         required: true
       responses:
         "201":
           description: Successfully created destination
           content: {}
         "409":
-          description: Destination already exists in db
+          description: Destination already exists
           content: {}
       x-codegen-request-body-name: body
-  /dest/{destId}:
+  /dest/{destinationIdentifier}:
     delete:
       tags:
         - destination
       summary: Deletes an existing new ntfy.sh destination
+      operationId: DeleteDest
       parameters:
-        - name: destId
+        - name: destinationIdentifier
           in: path
-          description: Id of destination
+          description: Identifier of destination
           required: true
           schema:
             type: string
@@ -68,18 +67,18 @@ paths:
         "404":
           description: Destination not found
           content: {}
-  /dest/{destId}/alerts:
+  /dest/{destinationIdentifier}/alerts:
     get:
       tags:
         - alert
         - destination
-      summary: Find all alerts by destinationID
-      description: Returns all alerts that are saved for this particular destId
-      operationId: getAlertByDestId
+      summary: Find all alerts by destinationIdentifier
+      description: Returns all alerts that are saved for this particular destinationIdentifier
+      operationId: getAlertByDestinationIdentifier
       parameters:
-        - name: destId
+        - name: destinationIdentifier
           in: path
-          description: Id of destination
+          description: Identifier of destination
           required: true
           schema:
             type: string
@@ -96,7 +95,7 @@ paths:
           description: Invalid destID supplied
           content: {}
         "404":
-          description: Destination not found by destId
+          description: Destination not found by destinationIdentifier
           content: {}
     post:
       tags:
@@ -105,9 +104,9 @@ paths:
       summary: Add a new alert to the db
       operationId: addAlert
       parameters:
-        - name: destId
+        - name: destinationIdentifier
           in: path
-          description: Id of destination
+          description: Identifier of destination for which to add the alert
           required: true
           schema:
             type: string
@@ -123,7 +122,7 @@ paths:
           description: Invalid input
           content: {}
       x-codegen-request-body-name: body
-  /dest/{destId}/alerts/{alertId}:
+  /dest/{destinationIdentifier}/alerts/{alertId}:
     put:
       tags:
         - alert
@@ -131,9 +130,9 @@ paths:
       summary: Update an existing alert
       operationId: updateAlert
       parameters:
-        - name: destId
+        - name: destinationIdentifier
           in: path
-          description: Id of destination
+          description: Identifier of destination
           required: true
           schema:
             type: string
@@ -167,9 +166,9 @@ paths:
       summary: Deletes an alert
       operationId: deleteAlert
       parameters:
-        - name: destId
+        - name: destinationIdentifier
           in: path
-          description: destinationId of the Alert to delete
+          description: destinationIdentifier of the Alert to delete
           required: true
           schema:
             type: string
@@ -188,15 +187,26 @@ paths:
           content: {}
 components:
   schemas:
+    Destination:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          x-field-extra-annotation: "@jakarta.persistence.Id @jakarta.persistence.GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)"
+
+        identifier:
+          type: string
     Alert:
       type: object
       properties:
         id:
           type: integer
           format: int64
-        from:
+          x-field-extra-annotation: "@jakarta.persistence.Id @jakarta.persistence.GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)"
+        begin:
           $ref: "#/components/schemas/City"
-        to:
+        finish:
           $ref: "#/components/schemas/City"
         expire:
           type: string
@@ -204,7 +214,7 @@ components:
         activeClients:
           type: array
           items:
-            $ref: "#/components/schemas/City"
+            $ref: "#/components/schemas/Client"
     City:
       type: string
       enum:
@@ -220,10 +230,10 @@ components:
         - COS
         - IMO
   parameters:
-    destId:
-      name: destId
+    destinationIdentifier:
+      name: destinationIdentifier
       in: path
-      description: Id of destination
+      description: Identifier of destination
       required: true
       schema:
         type: string
@@ -233,5 +243,5 @@ components:
       description: Id of the alert
       required: true
       schema:
-        type: string
+        type: int
 x-original-swagger-version: "2.0"

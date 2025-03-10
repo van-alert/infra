@@ -1,0 +1,32 @@
+services:
+  maria-van-alert:
+    build:
+      context: .
+      dockerfile: maria.Dockerfile
+    container_name: maria-van-alert
+    restart: always
+    environment:
+      MYSQL_DATABASE: vanalert
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/maria_password
+    secrets:
+      - maria_password
+    ports:
+      - "3306:3306"
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
+    container_name: backend-van-alert
+    restart: always
+    environment:
+      SPRING_CONFIG: prod
+      MYSQL_DATABASE: vanalert
+    secrets:
+      - maria_password
+    ports:
+      - "3306:3306"
+
+secrets:
+  maria_password:
+    file: ./secret/maria_password.txt
